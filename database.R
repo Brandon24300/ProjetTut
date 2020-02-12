@@ -67,6 +67,9 @@ createTables <- function(){
               "
          CREATE TABLE IF NOT EXISTS Resultat(
             idResultat int primary key not null,
+            votes int,
+            votesBlanc int,
+            votesNul int,
             electionId int not null,
             candidatId int not null,
             bureauVoteId int not null,

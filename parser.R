@@ -115,13 +115,19 @@ parseXmlFile <- function(url, model)
     # Example : https://www.interieur.gouv.fr/avotreservice/elections/telechargements/LG2017/resultatsT1/001/001com.xml
     # Si mega fichier faire un grep sur l'url pour juste recup le mega fichier dans le repertoire
     allCommunes <- xml_find_all(xmlFile,".//Commune")
-    print(length(allCommunes))
+    scrutin <- as_list(xml_find_first(xmlFile,".//Scrutin"))
+    sAnnee <- xml_text(xml_find_first(xmlFile,".//Annee")) # Extraction Annee de l'election
+    sTypeElection <- xml_text(xml_find_first(xmlFile,".//Type")) # Extraction Type Election
+    sCodeDepartement <- xml_text(xml_find_first(xmlFile,".//CodDpt")) # Extraction cpde departement 01 par exemple
+    sNomDepartement <- xml_text(xml_find_first(xmlFile,".//LibDpt")) # Extraction nom departement Ain par exemple
+    
+    #print(length(allCommunes))
     # aListResultat <- data.frame("candidats", "commune", "votesBlanc", "votesNul")
     aListResultat <- c()
     index = 0
     for (oCommune in allCommunes) 
     {
-      print(index)
+      #print(index)
       index <- index + 1
       oVotesBlanc <- xml_find_first(oCommune,".//Blancs")
       oVotesNul <- xml_find_first(oCommune,".//Nuls")
@@ -152,7 +158,17 @@ parseXmlFile <- function(url, model)
       aListCandidats <- as_list(allCandidats)
       
       # Creation du tableau de reponse
-      aResultat <- list(candidats = aListCandidats, commune = "" , votesBlanc = aListVotesBlanc, votesNul= aListVotesNul)
+      aResultat <- list(
+                        candidats = aListCandidats,
+                        commune = "" ,
+                        votesBlanc = aListVotesBlanc,
+                        votesNul= aListVotesNul,
+                        election = scrutin,
+                        annee = sAnnee,
+                        typeElection = sTypeElection,
+                        codeDepartement = sCodeDepartement,
+                        nomDepartement = sNomDepartement
+                      )
       
       #names(aListResultat)<-c(aListCandidats, "", aListVotesBlanc, aListVotesNul )
       #aListResultat  <- c(aListCandidats, "", aListVotesBlanc, aListVotesNul )
