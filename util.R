@@ -12,6 +12,14 @@ loadPackages <- function(packages){
 }
 
 
+Unaccent <- function(text) {
+  text <- gsub("[`^~\"-]", " ", text)
+  text <- gsub("[ιθ]", "e", text)
+  text <- gsub("[τ]", "o", text)
+  text <- iconv(text, to="ASCII//TRANSLIT//IGNORE")
+  text <- gsub("[`^~\"-]", "", text)
+  return(text)
+}
 
 is_empty <- function(x, first.only = TRUE, all.na.empty = TRUE) {
   # do we have a valid vector?

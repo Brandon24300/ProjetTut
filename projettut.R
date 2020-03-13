@@ -1,27 +1,37 @@
 source("projettut\\util.R")
-source("projettut\\database.R")
-source("projettut\\parser.R")
+
+
 # Installation et chargement automatique des packages si nÃ©cessaire
 packages <- c("xml2", "RCurl", "RSQLite")
 installPackages(packages)
 library(xml2)
 library(RCurl)
 library(RSQLite)
+source("projettut\\database.R")
+source("projettut\\parser.R")
 createTables()
 
-# Permet de voir dans la console R toutes les tables crées
-dbListTables(getDbConnexion())
 
-#aListUrlElections <- genererUrlElectionsWithRegex()
-sUrl = "https://www.interieur.gouv.fr/avotreservice/elections/telechargements/LG2017/resultatsT1/001/00101024.xml"
-listCandidats = parseXmlFile(sUrl, "autre")
-# Méthode a renommer 
-# Permet d'insérer le résultat de parseXml File en base
-# Méthode non terminé 
-# Il manque l'insertion des votes blancs, null
-# et insertion resultat
-creerTest(listCandidats)
+url <- "https://www.interieur.gouv.fr/avotreservice/elections/telechargements/DP2015/resultatsT1/001/00100000.xml"
+aResultat <- parseXmlFile(url)
+source("projettut\\database.R")
 
 
+test <- c("aaaa", "ddd")
+a <- sprintf("'%s'", test)
+a
+
+start.time <- Sys.time()
+d = creerTest(aResultat)
+end.time <- Sys.time()
+time.taken <- end.time - start.time
+time.taken
+# 450 ms plein de requete en une transaction
+# 260 ms
+# Sans transaction = 1 minute 27
+# Modification mode ecriture, new time = identique
+# Transaction = 30 Seconde sur les candidats
+# 22 Seconde
+# 21.8
 
 
