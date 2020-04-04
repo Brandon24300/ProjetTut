@@ -12,17 +12,22 @@ source("projettut\\parser.R")
 createTables()
 
 
-url <- "https://www.interieur.gouv.fr/avotreservice/elections/telechargements/DP2015/resultatsT1/001/00100000.xml"
+url <- "https://www.interieur.gouv.fr/avotreservice/elections/telechargements/LG2012/resultatsT1/001/001com.xml"
 aResultat <- parseXmlFile(url)
 source("projettut\\database.R")
 
 
-test <- c("aaaa", "ddd")
-a <- sprintf("'%s'", test)
-a
-
+aResultatLabel <-  c("vote","nbVoteBlanc", "nbVoteNuls", "candidatId", "idTypeElection","idCommune")
+aResultatAndCandidatLabel <- c(aResultatLabel,"prenom", "nom", "idPartieCandidat", "nomPartie", "civilite")
 start.time <- Sys.time()
 d = creerTest(aResultat)
+
+
+a <- 10
+b <- a
+a<- 5
+a
+b
 end.time <- Sys.time()
 time.taken <- end.time - start.time
 time.taken

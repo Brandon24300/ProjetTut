@@ -186,7 +186,6 @@ creerTest <- function(list){
     # Parcours des candidats
     for (index3 in 1:length(listCandidats)) {
       candidat <- listCandidats[index3]$Candidat
-      
       nom = candidat$NomPsn
       prenom = candidat$PrenomPsn
       civilite =  candidat$CivilitePsn
@@ -231,23 +230,60 @@ creerTest <- function(list){
   }
   
   aNomParties <- unique(aResultatCandidat$nomPartie);
-  aCandidatInfos <- aResultatCandidat[,c("nom","prenom","civilite")]
+  aCandidatInfos <- aResultatCandidat[,c("nom","prenom","civilite", "nomPartie")]
   
   aNomPartiesFromDataBase <- getAllPartiePolitique(connexion, aNomParties)
   aCandidatsFromDatabase <- getAllCandidats(connexion, aCandidatInfos[,"nom"], aCandidatInfos[,"prenom"])
   
-  aNomPartieNonExistant <- aNomPartiesFromDataBase[aNomPartiesFromDataBase$libelle %notin% aNomParties]
+  aCandidatsNonExistant <- aCandidatsFromDatabase[aCandidatsFromDatabase$nomCandidat %notin% aCandidatInfos$nom && aCandidatsFromDatabase$prenomCandidat %notin% aCandidatInfos$prenom, ]
+  
+  aNomPartieNonExistant <- aNomPartiesFromDataBase[aNomPartiesFromDataBase$libelleParti %notin% aNomParties]
+  aCandidatNonExistant  <- NULL
   if(is_empty(aNomPartieNonExistant) == FALSE){
-    print(aNomPartieNonExistant)
-    #creerPartiePolitique()
+    print("LOL")
+    for(sNomPartie in aNomPartieNonExistant){
+      partieId <- creerPartiePolitique(connexion, sNomPartie)
+      aNomPartiesFromDataBase[nrow(aNomPartiesFromDataBase) + 1, ] <- c(partieId, sNomPartie)
+    }
+  }else if(is_empty(aNomParties) == FALSE && is_empty(aNomPartiesFromDataBase)){
+    print("Lel")
+    for(sNomPartie in aNomParties){
+      partieId <- creerPartiePolitique(connexion, sNomPartie)
+      aNomPartiesFromDataBase[nrow(aNomPartiesFromDataBase) + 1, ] <- c(partieId, sNomPartie)
+    }
+  }
+ # print(unique(aCandidatInfos))
+  if(is_empty(aCandidatsNonExistant) == FALSE){
+    print("LLL")
+  }
+  else if (is_empty(aCandidatsFromDatabase)) {
+    print("Miam")
+    
+    for(index in 1:nrow(unique(aCandidatInfos))){
+      nomPartieCandidat <- aCandidatInfos[index,]$nomPartie
+      nomCandidat <- aCandidatInfos[index,]$nom
+      prenomCandidat <- aCandidatInfos[index,]$prenom
+      civiliteCandidat <- aCandidatInfos[index,]$civilite
+      iIdPartieCandidat <- aNomPartiesFromDataBase[aNomPartiesFromDataBase$libelleParti %in% nomPartieCandidat,][1,]$idPartiPolitique
+      #(firstName, name, sexe, idPartiePolitique){
+      creerCandidat(connexion, prenomCandidat, nomCandidat, civiliteCandidat, iIdPartieCandidat  )
+      #print(aCandidatInfos[index,])
+    }
   }
   
   dbCommit(connexion)
   # Parcours de notre nouvelle liste candidat
-  for(index in nrow(aResultatCandidat)){
-    
+  for(index in 1:nrow(aResultatCandidat)){
+    oCandidatFromXml <- aResultatCandidat[index,]
+    oCandidatFromBase <- aCandidatsFromDatabase[aCandidatsFromDatabase$nomCandidat == oCandidatFromXml$nom && aCandidatsFromDatabase$prenomCandidat == oCandidatFromXml$prenom, ]
+    if(is_empty(oCandidatFromBase)){
+      cat(oCandidatFromXml$nom, oCandidatFromXml$prenom)
+      print("")
+    }
   }
+ # print(aCandidatsFromDatabase)
  
+  dbDisconnect(connexion)
 }
 
 # ======================= Bureau Vote ====================================
@@ -301,8 +337,8 @@ bureauVoteExiste <- function(conn, id){
 
 # ============================ Methode Table Candidat ======================================
 # Renvoie null si l'id n'existe pas 
-creerCandidat <- function(firstName, name, sexe, idPartiePolitique){
-  conn <- getDbConnexion()
+creerCandidat <- function(conn, firstName, name, sexe, idPartiePolitique){
+ # conn <- getDbConnexion()
 
   query <- sprintf(
     "insert into Candidat (nomCandidat, prenomCandidat, sexe, partiPolitiqueId) VALUES ('%s', '%s', '%s', %s)",
